@@ -3,29 +3,7 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var app = express();
 const sql = require('mssql')
-/*
-var logger = function(req,res,next){
-    console.log('Logging...');
-    next();
-};
-app.use(logger);
-*/
 
-//View Engine
-
-var accounts = [
-    {
-        accountid:1,
-        accountname:'Profit And Loss',
-        balance:1000
-    },
-    {
-        accountid:2,
-        accountname:'Balance Sheet',
-        balance:134
-    },
-    
-]
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'));
 
@@ -43,19 +21,43 @@ sql.on('error', err => {
     console.dir(err);
     sql.close();
 });
-app.get('/GetAccount',function(req,res){
-    var title='Account';
+// app.get('/GetAccount',function(req,res){
+//     var title='Account';
+//     sql.connect(DbConnectionString).then(pool => {
+//         return pool.request()
+//             .query('select * from Account_Master;');
+//     }).then(result => {
+//         sql.close();
+//         res.send( 
+//                     {
+//                         Responce:"Success",
+//                         Result:result.recordset 
+//                     }
+//                 );
+//     }).catch(err => {
+//         sql.close();
+//         res.send( 
+//             {
+//                 Responce:"failed",
+//                 Result:err 
+//             }
+//         );
+//     });
+// });
+
+app.get('/api/GetAccounts',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Methods', '*');
     
+    var title='Account';
     sql.connect(DbConnectionString).then(pool => {
         return pool.request()
-            .query('select * from Account_Master;');
+            .query('select id,name,balance from Account_Master;');
     }).then(result => {
         sql.close();
         res.send( 
-                    {
-                        Responce:"Success",
-                        Result:result.recordset 
-                    }
+                    result.recordset 
                 );
     }).catch(err => {
         sql.close();
@@ -66,7 +68,8 @@ app.get('/GetAccount',function(req,res){
             }
         );
     });
-  });
+
+});
 
 app.listen(3000, function(){
     console.log('Server Started on port 3000');
