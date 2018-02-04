@@ -1,3 +1,4 @@
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
@@ -59,6 +60,45 @@ app.get('/api/GetAccounts',function(req,res){
         res.send( 
                     result.recordset 
                 );
+    }).catch(err => {
+        sql.close();
+        res.send( 
+            {
+                Responce:"failed",
+                Result:err 
+            }
+        );
+    });
+
+});
+app.get('/api/GetAccount/:id',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Methods', '*');
+    var title='Account';
+    var tid=req.params.id;
+    var sqlquery='select id,name,balance from account_master where id='+tid+';';
+    sql.connect(DbConnectionString).then(pool => {
+        return pool.request()
+            .query(sqlquery);
+    }).then(result => {
+        sql.close();
+        var numRows = result.recordset.length;
+        if (numRows == 0)
+        {
+            res.send(
+                        {
+                            Responce:"failed no data",
+                            Result:"No Data Found"
+                        } 
+                    );
+        }
+        else
+        {
+            res.send( 
+                        result.recordset[0]
+                    );
+        }
     }).catch(err => {
         sql.close();
         res.send( 
